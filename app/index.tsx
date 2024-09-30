@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'; 
+import { getAuth, createUserWithEmailAndPassword  } from 'firebase/auth'; 
 
 // Configurações do Firebase (substitua pelos seus valores)
 const firebaseConfig = {
@@ -21,16 +21,26 @@ const App = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
     try {
       const auth = getAuth();
-      await signInWithEmailAndPassword(auth, email, password);   
-
-      console.log('Usuário logado com sucesso!');
+      await createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // O usuário foi criado com sucesso
+          const user = userCredential.user;
+          console.log('Usuário criado com sucesso:', user);
+        })
+        .catch((error) => {
+          // Tratar erros de cadastro
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.error('Erro ao criar usuário:', error);
+        });
     } catch (error) {
       console.error(error);
     }
   };
+  
   return (
     <View>
       <TextInput
@@ -44,7 +54,7 @@ const App = () => {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Login" onPress={handleLogin} />
+      <Button title="Cadastrar" onPress={handleSignup} />
     </View>
   );
 };
